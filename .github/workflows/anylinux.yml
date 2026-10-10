@@ -14,15 +14,8 @@ on:
 
 jobs:
   build:
-    name: "Package NFGram AnyLinux (${{ matrix.arch }})"
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        include:
-          - runs-on: ubuntu-latest
-            arch: x86_64
-          - runs-on: ubuntu-24.04-arm
-            arch: aarch64
+    name: "Package NFGram AnyLinux (x86_64)"
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
       options: '--privileged'
@@ -98,5 +91,5 @@ jobs:
       - name: Upload AppImage Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: NFGram-AnyLinux-AppImage-${{ matrix.arch }}
+          name: NFGram-AnyLinux-AppImage-x86_64
           path: ./dist/*
