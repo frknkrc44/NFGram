@@ -72,3 +72,4 @@
 68. Show apply_to_join button if discussion group needs request to join in group profile from [Yurigram](https://github.com/Revincx/yurigram/commit/99d0987b74e3a9a00afc527561c6ee4b76da37d3)
 69. Hide similar channels on join message from [Yukigram (Legacy)](https://github.com/yukigram/yukigram-legacy/commit/5ab13301e60cdd98e8933da41ed3d82d89246e09)
 70. Hide Recent Stickers (Set it to 0)
+71. Show forwarded message date from [Yukigram](https://github.com/yukigram/yukigram/blob/main/tdesktop/cur/0060-Message-Show-forwarded-message-date.patch)
