@@ -245,6 +245,23 @@ namespace Settings {
 			EnhancedSettings::Write();
 		}, container->lifetime());
 
+		auto forwardedDateBtn = AddButtonWithIcon(
+				inner,
+				tr::lng_settings_show_forwarded_date(),
+				st::settingsButtonNoIcon
+		);
+		forwardedDateBtn->setColorOverride(QColor(255, 0, 0));
+		forwardedDateBtn->toggleOn(
+				rpl::single(GetEnhancedBool("show_forwarded_date"))
+		)->toggledChanges(
+		) | rpl::filter([=](bool toggled) {
+			return (toggled != GetEnhancedBool("show_forwarded_date"));
+		}) | rpl::on_next([=](bool toggled) {
+			SetEnhancedValue("show_forwarded_date", toggled);
+			EnhancedSettings::Write();
+			QTimer::singleShot(1 * 1000, []{ Core::Restart(); });
+		}, container->lifetime());
+
 		AddButtonWithIcon(
 				inner,
 				tr::lng_settings_disable_link_warning(),
