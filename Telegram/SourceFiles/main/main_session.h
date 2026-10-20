@@ -132,6 +132,7 @@ public:
 	}
 
 	[[nodiscard]] bool premium() const;
+	[[nodiscard]] bool premiumUpsellShown() const;
 	[[nodiscard]] bool premiumPossible() const;
 	[[nodiscard]] rpl::producer<bool> premiumPossibleValue() const;
 	[[nodiscard]] bool premiumBadgesShown() const;

@@ -2499,6 +2499,9 @@ void ChooseStarGiftRecipient(
 }
 
 bool CanSendStarGiftTo(not_null<PeerData*> peer) {
+	if (!peer->session().premiumUpsellShown()) {
+		return false;
+	}
 	if (const auto user = peer->asUser()) {
 		return !user->isInaccessible()
 			&& !user->isSelf()

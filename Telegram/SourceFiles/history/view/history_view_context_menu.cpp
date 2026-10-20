@@ -2558,6 +2558,9 @@ void AddGiftMessageAction(
 		return;
 	}
 	const auto peer = item->history()->peer;
+	if (!peer->session().premiumUpsellShown()) {
+		return;
+	}
 	const auto user = peer->asUser();
 	const auto isGift = gift->slug.isEmpty() || !gift->channel;
 	if (!isGift

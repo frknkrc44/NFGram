@@ -5616,6 +5616,7 @@ void ComposeControls::refreshSendGiftToggle() {
 		| Type::Unique;
 	const auto has = _regularWindow
 		&& user
+		&& session().premiumUpsellShown()
 		&& !_writeRestriction.current()
 		&& !user->isServiceUser()
 		&& !user->isSelf()

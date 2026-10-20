@@ -2938,7 +2938,7 @@ void HistoryWidget::applyComposeStash(Data::ComposeStash &&stash) {
 }
 
 void HistoryWidget::setupGiftToChannelButton() {
-	if (GetEnhancedBool("disable_premium_annoyance")) {
+	if (!session().premiumUpsellShown()) {
 		return;
 	}
 
@@ -4101,6 +4101,7 @@ void HistoryWidget::refreshSendGiftToggle() {
 		| Type::Unique;
 	const auto has = user
 		&& _canSendMessages
+		&& user->session().premiumUpsellShown()
 		&& !user->isServiceUser()
 		&& !user->isSelf()
 		&& !user->isBot()

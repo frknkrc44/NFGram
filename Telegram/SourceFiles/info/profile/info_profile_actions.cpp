@@ -944,6 +944,7 @@ void DeleteContactNote(
 	result->setDuration(st::infoSlideDuration);
 	const auto button = result->entity();
 	button->setTextTransform(Ui::RoundButtonTextTransform::ToUpper);
+	const auto showGift = user->session().premiumUpsellShown();
 
 	auto outer = Ui::CreateChild<Ui::SlideWrap<Ui::VerticalLayout>>(
 		button,
@@ -961,6 +962,7 @@ void DeleteContactNote(
 
 	const auto giftIcon = Ui::CreateChild<Ui::RpWidget>(layout);
 	giftIcon->resize(st::birthdayTodayIcon.size());
+	giftIcon->setVisible(showGift);
 	layout->sizeValue() | rpl::on_next([=](QSize size) {
 		giftIcon->moveToRight(
 			0,
@@ -981,9 +983,11 @@ void DeleteContactNote(
 	) | rpl::on_next([=](bool today) {
 		const auto disable = !today && user->session().premiumCanBuy();
 		button->setDisabled(disable);
-		button->setAttribute(Qt::WA_TransparentForMouseEvents, disable);
+		button->setAttribute(
+			Qt::WA_TransparentForMouseEvents,
+			disable || !showGift);
 		button->clearState();
-		giftIcon->setVisible(!disable);
+		giftIcon->setVisible(showGift && !disable);
 	}, result->lifetime());
 
 	BirthdayValueText(
@@ -1030,7 +1034,7 @@ void DeleteContactNote(
 	Ui::ResizeFitChild(button, outer);
 
 	button->setClickedCallback([=] {
-		if (!button->isDisabled()) {
+		if (showGift && !button->isDisabled()) {
 			Ui::ShowStarGiftBox(controller, user);
 		}
 	});

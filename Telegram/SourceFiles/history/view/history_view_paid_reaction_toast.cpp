@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/history_view_element.h"
 #include "history/history_item.h"
 #include "lang/lang_keys.h"
+#include "main/main_session.h"
 #include "ui/effects/numbers_animation.h"
 #include "ui/text/text_utilities.h"
 #include "ui/toast/toast.h"
@@ -189,6 +190,9 @@ rpl::producer<Calls::GroupCall*> PaidReactionToast::shownForCall() const {
 }
 
 bool PaidReactionToast::maybeShowFor(not_null<HistoryItem*> item) {
+	if (!_owner->session().premiumUpsellShown()) {
+		return false;
+	}
 	const auto count = item->reactionsPaidScheduled();
 	const auto shownPeer = item->reactionsLocalShownPeer();
 	const auto at = _owner->reactions().sendingScheduledPaidAt(item);
@@ -205,6 +209,9 @@ bool PaidReactionToast::maybeShowFor(not_null<HistoryItem*> item) {
 }
 
 bool PaidReactionToast::maybeShowFor(not_null<Calls::GroupCall*> call) {
+	if (!_owner->session().premiumUpsellShown()) {
+		return false;
+	}
 	const auto count = call->messages()->reactionsPaidScheduled();
 	const auto shownPeer = call->messagesFrom()->id;
 	const auto at = _owner->reactions().sendingScheduledPaidAt(call);

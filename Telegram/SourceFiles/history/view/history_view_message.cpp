@@ -1044,6 +1044,9 @@ void Message::initPaidInformation() {
 	} else if (!item->history()->peer->isUser()) {
 		return;
 	}
+	if (!item->history()->session().premiumUpsellShown()) {
+		return;
+	}
 	const auto media = this->media();
 	const auto mine = PaidInformation{
 		.messages = 1,

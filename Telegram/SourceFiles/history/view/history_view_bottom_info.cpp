@@ -723,7 +723,8 @@ BottomInfo::Data BottomInfoDataFromMessage(not_null<Message*> message) {
 			|| !message->media()->drawsOwnEphemeralBadge())) {
 		result.flags |= Flag::Ephemeral;
 	}
-	if (!item->history()->peer->isUser()) {
+	if (!item->history()->peer->isUser()
+		&& item->history()->session().premiumUpsellShown()) {
 		const auto mine = PaidInformation{
 			.messages = 1,
 			.stars = item->starsPaid(),

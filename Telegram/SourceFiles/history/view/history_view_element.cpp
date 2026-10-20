@@ -758,7 +758,10 @@ QString DateTooltipText(not_null<Element*> view) {
 	}
 
 	if (const auto stars = item->out() ? item->starsPaid() : 0) {
-		dateText += '\n' + tr::lng_you_paid_stars(tr::now, lt_count, stars);
+		if (item->history()->session().premiumUpsellShown()) {
+			dateText += '\n'
+				+ tr::lng_you_paid_stars(tr::now, lt_count, stars);
+		}
 	}
 
 	return dateText;
@@ -3009,7 +3012,8 @@ void Element::refreshReactions() {
 					return;
 				}
 				if (id.paid()) {
-					if (!controller) {
+					if (!controller
+						|| !item->history()->session().premiumUpsellShown()) {
 						return;
 					}
 					Payments::TryAddingPaidReaction(

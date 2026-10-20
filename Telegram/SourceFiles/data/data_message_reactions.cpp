@@ -203,6 +203,8 @@ PossibleItemReactionsRef LookupPossibleReactions(
 	const auto &allowed = PeerAllowedReactions(peer);
 	const auto limit = UniqueReactionsLimit(peer);
 	const auto premiumPossible = session->premiumPossible();
+	const auto paidAllowed = allowed.paidEnabled
+		&& session->premiumUpsellShown();
 	const auto limited = (all.size() >= limit) && [&] {
 		const auto my = item->chosenReactions();
 		if (my.empty()) {
@@ -236,7 +238,7 @@ PossibleItemReactionsRef LookupPossibleReactions(
 		result.customAllowed = premiumPossible;
 		result.tags = true;
 	} else if (limited) {
-		result.recent.reserve((allowed.paidEnabled ? 1 : 0) + all.size());
+		result.recent.reserve((paidAllowed ? 1 : 0) + all.size());
 		add([&](const Reaction &reaction) {
 			return ranges::contains(all, reaction.id, &MessageReaction::id);
 		});
@@ -248,16 +250,16 @@ PossibleItemReactionsRef LookupPossibleReactions(
 				}
 			}
 		}
-		if (allowed.paidEnabled
+		if (paidAllowed
 			&& !added.contains(ReactionId::Paid())) {
 			result.recent.push_back(reactions->lookupPaid());
 		}
 	} else {
-		result.recent.reserve((allowed.paidEnabled ? 1 : 0)
+		result.recent.reserve((paidAllowed ? 1 : 0)
 			+ ((allowed.type == AllowedReactionsType::Some)
 				? allowed.some.size()
 				: full.size()));
-		if (allowed.paidEnabled) {
+		if (paidAllowed) {
 			result.recent.push_back(reactions->lookupPaid());
 		}
 		add([&](const Reaction &reaction) {
@@ -315,9 +317,14 @@ PossibleItemReactionsRef LookupPossibleReactions(
 			}
 		}
 		toFront(reactions->favoriteId());
-		if (paidInFront) {
+		if (paidAllowed && paidInFront) {
 			toFront(ReactionId::Paid());
 		}
+	}
+	if (!paidAllowed) {
+		result.recent.erase(
+			ranges::remove(result.recent, ReactionId::Paid(), &Reaction::id),
+			end(result.recent));
 	}
 	return result;
 }
@@ -330,6 +337,7 @@ PossibleItemReactionsRef LookupPossibleReactions(
 	const auto &top = reactions->list(Reactions::Type::Top);
 	const auto &recent = reactions->list(Reactions::Type::Recent);
 	const auto premiumPossible = session->premiumPossible();
+	const auto paidAllowed = session->premiumUpsellShown();
 	auto added = base::flat_set<ReactionId>();
 	result.recent.reserve(full.size());
 	for (const auto &reaction : ranges::views::concat(top, recent, full)) {
@@ -346,6 +354,11 @@ PossibleItemReactionsRef LookupPossibleReactions(
 		&Reaction::id);
 	if (i != end(result.recent) && i != begin(result.recent)) {
 		std::rotate(begin(result.recent), i, i + 1);
+	}
+	if (!paidAllowed) {
+		result.recent.erase(
+			ranges::remove(result.recent, ReactionId::Paid(), &Reaction::id),
+			end(result.recent));
 	}
 	return result;
 }
