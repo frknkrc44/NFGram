@@ -565,6 +565,9 @@ void HistoryInner::reactionChosen(const ChosenReaction &reaction) {
 	if (!item) {
 		return;
 	} else if (reaction.id.paid()) {
+		if (!session().premiumUpsellShown()) {
+			return;
+		}
 		Payments::ShowPaidReactionDetails(
 			_controller,
 			item,

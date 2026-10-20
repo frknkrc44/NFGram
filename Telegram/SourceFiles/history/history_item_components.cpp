@@ -385,7 +385,8 @@ void HistoryMessageForwarded::create(
 				tr::marked);
 		}
 	}
-	if (originalDate != TimeId(0)) {
+	if (originalDate != TimeId(0)
+		&& GetEnhancedBool("show_forwarded_date")) {
 		phrase.append(" " + Ui::kQBullet + u" \u2068" + Ui::FormatDateTime(base::unixtime::parse(originalDate)));
 	}
 	text.setMarkedText(st::fwdTextStyle, phrase, kMarkupTextOptions, context);

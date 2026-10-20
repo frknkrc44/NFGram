@@ -669,6 +669,9 @@ rpl::producer<int> SavedSublistCountValue(
 }
 
 rpl::producer<int> PeerGiftsCountValue(not_null<PeerData*> peer) {
+	if (!peer->session().premiumUpsellShown()) {
+		return rpl::single(0);
+	}
 	return peer->session().changes().peerFlagsValue(
 		peer,
 		UpdateFlag::PeerGifts

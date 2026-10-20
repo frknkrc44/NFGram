@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_item.h"
 #include "history/history_item_components.h"
 #include "lang/lang_keys.h"
+#include "main/main_session.h"
 #include "ui/text/format_values.h"
 
 namespace HistoryView {
@@ -1136,6 +1137,9 @@ QString MessageSubItemValue(
 		return {};
 	}
 	case MessageSubItem::PaidReactions: {
+		if (!data->history()->session().premiumUpsellShown()) {
+			return {};
+		}
 		const auto &reactions = data->reactions();
 		for (const auto &reaction : reactions) {
 			if (reaction.id.paid() && reaction.count > 0) {

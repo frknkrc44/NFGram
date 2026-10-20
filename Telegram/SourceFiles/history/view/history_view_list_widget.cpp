@@ -4204,6 +4204,9 @@ void ListWidget::reactionChosen(ChosenReaction reaction) {
 	if (!item) {
 		return;
 	} else if (reaction.id.paid()) {
+		if (!session().premiumUpsellShown()) {
+			return;
+		}
 		Payments::ShowPaidReactionDetails(
 			controller(),
 			item,

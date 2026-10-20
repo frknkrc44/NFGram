@@ -31,7 +31,8 @@ constexpr auto kSugBirthdayContacts = "BIRTHDAY_CONTACTS_TODAY"_cs;
 
 bool Available(const Context &context) {
 	const auto session = context.session.get();
-	return session->premiumCanBuy()
+	return session->premiumUpsellShown()
+		&& session->premiumCanBuy()
 		&& session->promoSuggestions().current(kSugBirthdayContacts.utf8());
 }
 

@@ -19,7 +19,8 @@ namespace Dialogs::TopBarSuggestions {
 namespace {
 
 bool Available(const Context &context) {
-	return context.session->giftAuctions().hasActive();
+	return context.session->premiumUpsellShown()
+		&& context.session->giftAuctions().hasActive();
 }
 
 void Activate(ActivateArgs args) {

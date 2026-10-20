@@ -573,7 +573,7 @@ void BuildPremiumSection(SectionBuilder &builder) {
 		.keywords = { u"work"_q, u"company"_q },
 	});
 
-	if (session->premiumCanBuy()) {
+	if (session->premiumUpsellShown() && session->premiumCanBuy()) {
 		builder.addButton({
 			.id = u"main/send-gift"_q,
 			.title = tr::lng_settings_gift_premium(),

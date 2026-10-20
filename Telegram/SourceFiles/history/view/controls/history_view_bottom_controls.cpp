@@ -288,6 +288,9 @@ void BottomControls::setupButtons() {
 }
 
 void BottomControls::setupGiftToChannelButton() {
+	if (!_controller || !_controller->session().premiumUpsellShown()) {
+		return;
+	}
 	_giftToChannel = Ui::CreateChild<Ui::IconButton>(
 		_muteUnmute.get(),
 		st::historyGiftToChannel);

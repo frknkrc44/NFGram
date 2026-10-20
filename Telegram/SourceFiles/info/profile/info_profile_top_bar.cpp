@@ -3409,6 +3409,11 @@ void TopBar::paintAnimatedPattern(
 
 void TopBar::setupPinnedToTopGifts(
 		not_null<Window::SessionController*> controller) {
+	if (!_peer->session().premiumUpsellShown()) {
+		_pinnedToTopGifts.clear();
+		_giftsLoadingLifetime.destroy();
+		return;
+	}
 	const auto requestDone = crl::guard(this, [=](
 			std::vector<Data::SavedStarGift> gifts) {
 		const auto shouldHideFirst = _pinnedToTopGiftsFirstTimeShowed

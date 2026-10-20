@@ -913,11 +913,21 @@ void InlineList::continueAnimations(base::flat_map<
 InlineListData InlineListDataFromMessage(not_null<Element*> view) {
 	using Flag = InlineListData::Flag;
 	const auto item = view->data();
+	const auto paidAllowed = item->history()->session().premiumUpsellShown();
 	auto result = InlineListData();
 	result.reactions = item->reactionsWithLocal();
+	if (!paidAllowed) {
+		result.reactions.erase(
+			ranges::remove_if(
+				result.reactions,
+				[](const MessageReaction &reaction) {
+					return reaction.id.paid();
+				}),
+			end(result.reactions));
+	}
 
 	const auto shouldAddEmptyPaidButton = [&] {
-		if (view->context() == Context::ChatPreview) {
+		if (!paidAllowed || view->context() == Context::ChatPreview) {
 			return false;
 		}
 		if (result.reactions.empty()) {

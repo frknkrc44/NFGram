@@ -358,8 +358,12 @@ bool Session::premium() const {
 	return _user->isPremium();
 }
 
+bool Session::premiumUpsellShown() const {
+	return !GetEnhancedBool("disable_premium_annoyance");
+}
+
 bool Session::premiumPossible() const {
-	return (premium() || premiumCanBuy()) && !GetEnhancedBool("disable_premium_annoyance");
+	return premium() || (premiumCanBuy() && premiumUpsellShown());
 }
 
 bool Session::premiumBadgesShown() const {
@@ -367,8 +371,6 @@ bool Session::premiumBadgesShown() const {
 }
 
 rpl::producer<bool> Session::premiumPossibleValue() const {
-	using namespace rpl::mappers;
-
 	auto premium = _user->flagsValue(
 	) | rpl::filter([=](UserData::Flags::Change change) {
 		return (change.diff & UserDataFlag::Premium);
@@ -377,8 +379,10 @@ rpl::producer<bool> Session::premiumPossibleValue() const {
 	});
 	return rpl::combine(
 		std::move(premium),
-		_premiumPossible.value(),
-		_1 || _2);
+		_premiumPossible.value()
+	) | rpl::map([=](bool premium, bool canBuy) {
+		return premium || (canBuy && premiumUpsellShown());
+	});
 }
 
 bool Session::premiumCanBuy() const {

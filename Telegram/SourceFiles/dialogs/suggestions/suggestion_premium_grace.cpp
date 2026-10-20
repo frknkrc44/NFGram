@@ -22,7 +22,8 @@ constexpr auto kSugPremiumGrace = "PREMIUM_GRACE"_cs;
 
 bool Available(const Context &context) {
 	const auto session = context.session.get();
-	return session->premiumCanBuy()
+	return session->premiumUpsellShown()
+		&& session->premiumCanBuy()
 		&& session->promoSuggestions().current(kSugPremiumGrace.utf8());
 }
 
