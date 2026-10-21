@@ -1866,7 +1866,7 @@ ShareBox::SubmitCallback ShareBox::DefaultForwardCallback(
 		using Flag = MTPmessages_ForwardMessages::Flag;
 
 		if (no_quote) {
-		    forwardOptions = Data::ForwardOptions::NoNamesAndCaptions;
+			forwardOptions = Data::ForwardOptions::NoSenderNames;
 		}
 
 		const auto commonSendFlags = Flag(0)
