@@ -2182,6 +2182,7 @@ void Element::validateText() {
 			runtime->tornEdges = nullptr;
 		}
 		runtime->handler = nullptr;
+		runtime->handlerTaskItem = std::nullopt;
 		runtime->handlerPreparedLink = std::nullopt;
 		runtime->handlerMediaActivation = {};
 		runtime->handlerPlaceholderId = {};
