@@ -588,8 +588,6 @@ bool Gif::underCursor(bool fullFeatured) const {
 bool Gif::autoplayEnabled() const {
 	if (_parent->context() == Context::MediaEditor) {
 		return false;
-	} else if (_realParent->isSponsored()) {
-		return true;
 	}
 	auto peerId = _parent->data()->from() ? _parent->data()->from()->id : PeerId(0);
 	auto user = history()->session().data().peerLoaded(_parent->data()->from() ? _parent->data()->from()->id : PeerId(0));
