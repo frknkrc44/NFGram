@@ -76,8 +76,8 @@ private:
 	//	u"tdesktop_config_map"_q,
 	//	base::flat_map<QString, QString>());
 	return {
-		.mapsToken = u"pk.eyJ1Ijoiam9obi1wcmVzdG9uIiwiYSI6ImNseW1ybmRpZTExMHcycnI1N21xdmN6encifQ.TKpKoHjKtFepjsMzVxKhyw"_q,
-		.geoToken = u"pk.eyJ1Ijoiam9obi1wcmVzdG9uIiwiYSI6ImNseW1ybnl1MDAwa3UybXNkZG81ampqZTEifQ.5YCJqZNNf8hSrTWIp53x8g"_q,
+		.mapsToken = u"bmaps"_q,
+		.geoToken = u"bgeo"_q,
 	};
 }
 
@@ -237,13 +237,10 @@ void Location::chooseOnMap() {
 		strong->activate();
 		return;
 	}
-	const auto callback = [=](Data::InputVenue venue) {
+	const auto callback = [=](Data::LocationPoint point, QString address) {
 		auto copy = _data.current();
-		copy.point = Data::LocationPoint(
-			venue.lat,
-			venue.lon,
-			Data::LocationPoint::NoAccessHash);
-		copy.address = venue.address;
+		copy.point = point;
+		copy.address = std::move(address);
 		_data = std::move(copy);
 	};
 	const auto session = &controller()->session();
@@ -258,7 +255,6 @@ void Location::chooseOnMap() {
 		.parent = controller()->widget(),
 		.config = _config,
 		.chooseLabel = tr::lng_maps_point_set(),
-		.session = session,
 		.initial = initial,
 		.callback = crl::guard(this, callback),
 		.quit = [] { Shortcuts::Launch(Shortcuts::Command::Quit); },
