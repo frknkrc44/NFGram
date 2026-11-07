@@ -713,41 +713,6 @@ void MainMenu::setupMenu() {
 			}
 		});
 
-		if (!GetEnhancedBool("hide_stories")) {
-			const auto wrap = _menu->add(
-				object_ptr<Ui::SlideWrap<Ui::SettingsButton>>(
-					_menu,
-				CreateButtonWithIcon(
-						_menu,
-						tr::lng_menu_my_stories(),
-						st::mainMenuButton,
-						IconDescriptor{ &st::menuIconStoriesSavedSection })));
-			const auto selfId = controller->session().userPeerId();
-			const auto stories = &controller->session().data().stories();
-			constexpr auto kArchive = Data::kStoriesAlbumIdArchive;
-			if (stories->albumIdsCount(selfId, kArchive) > 0) {
-				wrap->toggle(true, anim::type::instant);
-			} else {
-				wrap->toggle(false, anim::type::instant);
-				if (!stories->albumIdsCountKnown(selfId, kArchive)) {
-					stories->albumIdsLoadMore(selfId, kArchive);
-					const auto key = Data::StoryAlbumIdsKey{ selfId, kArchive };
-					wrap->toggleOn(stories->albumIdsChanged(
-				) | rpl::filter(
-					rpl::mappers::_1 == key
-					) | rpl::map([=] {
-						return stories->albumIdsCount(selfId, kArchive) > 0;
-					}) | rpl::filter(rpl::mappers::_1) | rpl::take(1));
-				}
-			}
-			wrap->entity()->setClickedCallback([=] {
-				controller->showSection(
-					Info::Stories::Make(controller->session().user()));
-			});
-		}
-
-		SetupMenuBots(_menu, controller);
-
 		addAction(
 			tr::lng_menu_contacts(),
 			{ &st::menuIconProfile }
