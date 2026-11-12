@@ -198,6 +198,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "webrtc/webrtc_environment.h"
 #include "window/notifications_manager.h"
 #include "window/window_adaptive.h"
+#include "window/window_columns.h"
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
 #include "window/window_slide_animation.h"
@@ -4042,17 +4043,21 @@ bool HistoryWidget::updateReplaceMediaButton() {
 	const auto hideDuration = st::historyReplaceMedia.ripple.hideDuration;
 	_replaceMedia->setClickedCallback([=] {
 		base::call_delayed(hideDuration, this, [=] {
-			EditCaptionBox::StartMediaReplace(
-				controller(),
-				{ _history->peer->id, _editMsgId },
-				_field->getTextWithTags(),
-				suggestOptions(),
-				_mediaEditManager.spoilered(),
-				_mediaEditManager.invertCaption(),
-				crl::guard(_list, [=] { cancelEdit(); }));
+			startMediaReplace();
 		});
 	});
 	return true;
+}
+
+void HistoryWidget::startMediaReplace() {
+	EditCaptionBox::StartMediaReplace(
+		controller(),
+		{ _history->peer->id, _editMsgId },
+		_field->getTextWithTags(),
+		suggestOptions(),
+		_mediaEditManager.spoilered(),
+		_mediaEditManager.invertCaption(),
+		crl::guard(_list, [=] { cancelEdit(); }));
 }
 
 void HistoryWidget::updateFieldSubmitSettings() {
@@ -6619,7 +6624,11 @@ void HistoryWidget::finishAnimating() {
 void HistoryWidget::chooseAttach(
 		std::optional<bool> overrideSendImagesAsPhotos) {
 	if (_editMsgId) {
-		controller()->showToast(tr::lng_edit_caption_attach(tr::now));
+		if (_replaceMedia) {
+			startMediaReplace();
+		} else {
+			controller()->showToast(tr::lng_edit_caption_attach(tr::now));
+		}
 		return;
 	}
 
@@ -7471,11 +7480,11 @@ bool HistoryWidget::pushTabbedSelectorToThirdSection(
 	} else if (!Data::CanSendAnyOf(
 			thread,
 			Data::TabbedPanelSendRestrictions())) {
-		Core::App().settings().setTabbedReplacedWithInfo(true);
+		controller()->columns().setTabbedReplacedWithInfo(true);
 		controller()->showPeerInfo(thread, params.withThirdColumn());
 		return false;
 	}
-	Core::App().settings().setTabbedReplacedWithInfo(false);
+	controller()->columns().setTabbedReplacedWithInfo(false);
 	controller()->resizeForThirdSection();
 	controller()->showSection(
 		std::make_shared<ChatHelpers::TabbedMemento>(),
@@ -7524,7 +7533,7 @@ void HistoryWidget::toggleTabbedSelectorMode() {
 	if (_tabbedPanel) {
 		if (controller()->canShowThirdSection()
 			&& !controller()->adaptive().isOneColumn()) {
-			Core::App().settings().setTabbedSelectorSectionEnabled(true);
+			controller()->columns().setTabbedSelectorSectionEnabled(true);
 			Core::App().saveSettingsDelayed();
 			pushTabbedSelectorToThirdSection(
 				_history,

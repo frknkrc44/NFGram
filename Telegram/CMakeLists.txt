@@ -71,6 +71,7 @@ if (DESKTOP_APP_TEST_APPS OR TDESKTOP_BUILD_UPDATE_TESTS)
         endif()
     endif()
 endif()
+include(cmake/test_iv_editor_state.cmake)
 include(cmake/test_iv_editor_table_grid.cmake)
 include(cmake/test_wallet_card_tint.cmake)
 include(cmake/test_wallet_phrase_shares.cmake)
@@ -170,6 +171,8 @@ PRIVATE
     api/api_editing.cpp
     api/api_editing.h
     api/api_filter_updates.h
+    api/api_forward_reply.cpp
+    api/api_forward_reply.h
     api/api_global_privacy.cpp
     api/api_global_privacy.h
     api/api_hash.cpp
@@ -337,6 +340,8 @@ PRIVATE
     boxes/choose_filter_box.h
     boxes/connection_box.cpp
     boxes/connection_box.h
+    boxes/contacts_box.cpp
+    boxes/contacts_box.h
     boxes/create_poll_box.cpp
     boxes/create_poll_box.h
     boxes/delete_messages_box.cpp
@@ -867,6 +872,8 @@ PRIVATE
     dialogs/ui/dialogs_topics_view.h
     dialogs/ui/dialogs_video_userpic.cpp
     dialogs/ui/dialogs_video_userpic.h
+    dialogs/dialogs_archive_slide.cpp
+    dialogs/dialogs_archive_slide.h
     dialogs/dialogs_community_chats_list.cpp
     dialogs/dialogs_community_chats_list.h
     dialogs/dialogs_community_requestable_list.cpp
@@ -891,6 +898,8 @@ PRIVATE
     dialogs/dialogs_pinned_list.h
     dialogs/dialogs_quick_action.cpp
     dialogs/dialogs_quick_action.h
+    dialogs/dialogs_removed_row_slide.cpp
+    dialogs/dialogs_removed_row_slide.h
     dialogs/dialogs_row.cpp
     dialogs/dialogs_row.h
     dialogs/dialogs_search_from_controllers.cpp
@@ -1332,6 +1341,8 @@ PRIVATE
     info/media/info_media_list_widget.h
     info/media/info_media_provider.cpp
     info/media/info_media_provider.h
+    info/media/info_media_voice_filter.cpp
+    info/media/info_media_voice_filter.h
     info/media/info_media_widget.cpp
     info/media/info_media_widget.h
     info/members/info_members_widget.cpp
@@ -2544,6 +2555,8 @@ PRIVATE
     window/window_chat_preview.h
     window/window_chat_switch_process.cpp
     window/window_chat_switch_process.h
+    window/window_columns.cpp
+    window/window_columns.h
     window/window_connecting_widget.cpp
     window/window_connecting_widget.h
     window/window_controller.cpp
