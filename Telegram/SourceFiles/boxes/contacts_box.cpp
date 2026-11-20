@@ -15,6 +15,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_session.h"
 #include "settings/settings_common.h" // HighlightArgs.
 #include "ui/boxes/confirm_box.h"
+#include "ui/effects/ripple_animation.h"
 #include "ui/effects/round_checkbox.h"
 #include "ui/painter.h"
 #include "ui/widgets/buttons.h"
@@ -44,9 +45,24 @@ public:
 		int y,
 		int outerWidth) override;
 
+	QSize rightActionSize() const override;
+	QMargins rightActionMargins() const override;
+	void rightActionAddRipple(
+		QPoint point,
+		Fn<void()> updateCallback) override;
+	void rightActionStopLastRipple() override;
+	void rightActionPaint(
+		Painter &p,
+		int x,
+		int y,
+		int outerWidth,
+		bool selected,
+		bool actionSelected) override;
+
 private:
 	const Fn<bool()> _selecting;
 	Ui::RoundCheckbox _check;
+	std::unique_ptr<Ui::RippleAnimation> _ripple;
 
 };
 
@@ -79,6 +95,64 @@ void SelectableContactRow::paintUserpicOverlay(
 		+ st.checkbox.selectWidth
 		- st::defaultPeerListCheck.size;
 	_check.paint(p, x + shift, y + shift, outerWidth);
+}
+
+QSize SelectableContactRow::rightActionSize() const {
+	if (_selecting()) {
+		return QSize();
+	}
+	const auto user = peer()->asUser();
+	return (user && (user->flags() & UserDataFlag::MutualContact))
+		? st::contactsMutualIcon.size()
+		: QSize();
+}
+
+QMargins SelectableContactRow::rightActionMargins() const {
+	return QMargins(
+		st::contactsCheckPosition.x(),
+		(st::contactsWithStories.item.height
+			- st::contactsMutualIcon.height()) / 2,
+		st::defaultPeerListItem.photoPosition.x()
+			+ st::contactsCheckPosition.x(),
+		0);
+}
+
+void SelectableContactRow::rightActionAddRipple(
+		QPoint point,
+		Fn<void()> updateCallback) {
+	if (!_ripple) {
+		const auto size = rightActionSize() + QSize(16, 16);
+		_ripple = std::make_unique<Ui::RippleAnimation>(
+			st::defaultRippleAnimation,
+			Ui::RippleAnimation::EllipseMask(size),
+			std::move(updateCallback));
+	}
+	_ripple->add(point - QPoint(8, 8));
+}
+
+void SelectableContactRow::rightActionStopLastRipple() {
+	if (_ripple) {
+		_ripple->lastStop();
+	}
+}
+
+void SelectableContactRow::rightActionPaint(
+		Painter &p,
+		int x,
+		int y,
+		int outerWidth,
+		bool selected,
+		bool actionSelected) {
+	if (_ripple) {
+		_ripple->paint(p, x - 8, y - 8, outerWidth);
+		if (_ripple->empty()) {
+			_ripple.reset();
+		}
+	}
+	const auto &icon = actionSelected
+		? st::contactsMutualIconOver
+		: st::contactsMutualIcon;
+	icon.paint(p, style::rtlpoint(QPoint(x, y), outerWidth), outerWidth);
 }
 
 class ContactsListController final
