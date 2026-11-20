@@ -42,10 +42,6 @@ inline bool WaitForProcessExit(uint64 processId, crl::time timeout) {
 	return true;
 }
 
-inline bool LocalSocketPeerAllowed(qintptr) {
-	return true;
-}
-
 inline QString ApplicationIconName() {
 	return {};
 }
@@ -77,4 +73,3 @@ int psFixPrevious();
 
 void psDownloadPathEnableAccess();
 QByteArray psDownloadPathBookmark(const QString &path);
-QByteArray psPathBookmark(const QString &path);

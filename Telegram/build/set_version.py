@@ -26,11 +26,10 @@ versionMinor = ''
 versionPatch = ''
 versionAlpha = '0'
 versionBeta = False
-versionUpstream = ''
-if len(sys.argv) >= 3:
-  match = re.match(r'^\s*(\d+)\.(\d+)(\.(\d+)(\.(\d+|beta))?)?\s*$', sys.argv[1])
+for arg in sys.argv:
+  match = re.match(r'^\s*(\d+)\.(\d+)(\.(\d+)(\.(\d+|beta))?)?\s*$', arg)
   if match:
-    inputVersion = sys.argv[1]
+    inputVersion = arg
     versionOriginal = inputVersion
     versionMajor = match.group(1)
     versionMinor = match.group(2)
@@ -41,9 +40,6 @@ if len(sys.argv) >= 3:
         versionBeta = True
       else:
         versionAlpha = match.group(6)
-  match = re.match(r'^\s*(\d+)\.(\d+)(\.(\d+)(\.(\d+|beta))?)?\s*$', sys.argv[2])
-  if match:
-    versionUpstream = sys.argv[2]
 
 if not len(versionMajor):
   print("Wrong version parameter")
@@ -116,7 +112,55 @@ def replaceInFile(path, replacements):
     with open(path, 'w') as f:
       f.write(content)
 
+def resolveConflicts(path):
+  content = ''
+  found = 0
+  state = 'normal'
+  with open(path, 'r') as f:
+    for line in f:
+      if state == 'normal':
+        if line.startswith('<<<<<<<'):
+          state = 'ours'
+          found = found + 1
+        elif line.startswith('|||||||') or line.startswith('=======') or line.startswith('>>>>>>>'):
+          print('Unexpected conflict marker in "' + path + '".')
+          finish(1)
+        else:
+          content = content + line
+      elif state == 'ours':
+        if line.startswith('|||||||'):
+          state = 'base'
+        elif line.startswith('======='):
+          state = 'theirs'
+        elif line.startswith('<<<<<<<') or line.startswith('>>>>>>>'):
+          print('Unexpected conflict marker in "' + path + '".')
+          finish(1)
+        else:
+          content = content + line
+      elif state == 'base':
+        if line.startswith('======='):
+          state = 'theirs'
+        elif line.startswith('<<<<<<<') or line.startswith('>>>>>>>'):
+          print('Unexpected conflict marker in "' + path + '".')
+          finish(1)
+      elif state == 'theirs':
+        if line.startswith('>>>>>>>'):
+          state = 'normal'
+        elif line.startswith('<<<<<<<') or line.startswith('======='):
+          print('Unexpected conflict marker in "' + path + '".')
+          finish(1)
+        elif line.strip():
+          print('Dropped from upstream: ' + line.strip())
+  if state != 'normal':
+    print('Unclosed conflict in "' + path + '".')
+    finish(1)
+  if found:
+    with open(path, 'w') as f:
+      f.write(content)
+    print('Resolved ' + str(found) + ' conflict(s) in "' + path + '".')
+
 print('Patching build/version...')
+resolveConflicts(scriptPath + '/version')
 replaceInFile(scriptPath + '/version', [
   [ r'(AppVersion\s+)\d+', r'\g<1>' + versionFull ],
   [ r'(AppVersionStrMajor\s+)\d[\d\.]*', r'\g<1>' + versionMajor + '.' + versionMinor ],
@@ -128,6 +172,7 @@ replaceInFile(scriptPath + '/version', [
 ])
 
 print('Patching core/version.h...')
+resolveConflicts(scriptPath + '/../SourceFiles/core/version.h')
 replaceInFile(scriptPath + '/../SourceFiles/core/version.h', [
   [ r'(TDESKTOP_REQUESTED_ALPHA_VERSION\s+)\(\d+ULL\)', r'\g<1>(' + versionFullAlpha + 'ULL)' ],
   [ r'(AppVersion\s+=\s+)\d+', r'\g<1>' + versionFull ],
@@ -146,12 +191,15 @@ rcReplaces = [
 ]
 
 print('Patching Telegram.rc...')
+resolveConflicts(scriptPath + '/../Resources/winrc/Telegram.rc')
 replaceInFile(scriptPath + '/../Resources/winrc/Telegram.rc', rcReplaces)
 
 print('Patching Updater.rc...')
+resolveConflicts(scriptPath + '/../Resources/winrc/Updater.rc')
 replaceInFile(scriptPath + '/../Resources/winrc/Updater.rc', rcReplaces)
 
 print('Patching appxmanifest.xml...')
+resolveConflicts(scriptPath + '/../Resources/uwp/AppX/AppxManifest.xml')
 replaceInFile(scriptPath + '/../Resources/uwp/AppX/AppxManifest.xml', [
   [ r'( Version=)"\d+\.\d+\.\d+\.\d+"', r'\g<1>"' + withdot + '"' ],
 ])
